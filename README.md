@@ -1,151 +1,102 @@
-# Dota 2 Stats Query - Claude Code Skill
+# 🎮 Dota 2 战绩查询 - Claude Code Skill
 
-A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skill for querying Dota 2 player records, match data, and hero statistics via the [OpenDota API](https://docs.opendota.com/).
+基于 [OpenDota API](https://docs.opendota.com/) 的完整 Dota 2 数据查询技能，覆盖全部 API 端点，供 [Claude Code](https://docs.anthropic.com/en/docs/claude-code) 使用。
 
-用于查询 Dota 2 玩家战绩、比赛数据和英雄统计的 Claude Code 技能插件。
+## ✨ 功能 (27 个命令)
 
-## Language Support
+### 🧑 玩家
+| 命令 | 说明 |
+|------|------|
+| `search <name>` | 搜索玩家 |
+| `player <id>` | 段位、MMR、胜率 |
+| `wl <id>` | 胜负统计（支持筛选） |
+| `recent <id>` | 最近 ~20 场 |
+| `matches <id>` | 完整历史 |
+| `heroes <id>` | 英雄统计 |
+| `peers <id>` | 一起玩的人 |
+| `totals <id>` | 生涯累计数据 |
+| `counts <id>` | 分类统计 |
+| `rankings <id>` | 英雄排名百分位 |
+| `ratings <id>` | 段位变化历史 |
+| `refresh <id>` | 刷新数据 |
 
-Default output is **Chinese**. Add `--lang en` to any command for **English** output.
+### ⚔️ 比赛
+| 命令 | 说明 |
+|------|------|
+| `match <match_id>` | 10 人完整数据 |
 
-默认输出**中文**。添加 `--lang en` 参数切换为**英文**输出。
+### 🦸 英雄
+| 命令 | 说明 |
+|------|------|
+| `hero_list` | 英雄列表 |
+| `hero_stats` | 全局统计 |
+| `hero_matchups <hero_id>` | 对抗胜率 |
+| `hero_rankings <hero_id>` | Top 玩家 |
+| `benchmarks <hero_id>` | 表现基准 |
 
-## Features / 功能特性
+### 🌍 全局
+| 命令 | 说明 |
+|------|------|
+| `pro_players` | 职业选手 |
+| `pro_matches` | 职业比赛 |
+| `public_matches` | 公开比赛 |
+| `live` | 实时比赛 |
+| `teams` | 战队列表 |
+| `team <team_id>` | 战队详情+阵容+赛果 |
+| `leagues` | 联赛列表 |
+| `constants <resource>` | 游戏常量 |
+| `find_matches` | 按英雄阵容搜索 |
 
-| Feature | Command | Description |
-|---------|---------|-------------|
-| Search Player | `search <name>` | Find player account_id by Steam name / 通过名字查找 account_id |
-| Player Info | `player <id>` | Rank, MMR, overall win rate / 段位、MMR、总胜率 |
-| Win/Loss Stats | `wl <id>` | W/L with hero/days/lobby filters / 胜/负场次，支持筛选 |
-| Recent Matches | `recent <id>` | Last ~20 matches with KDA, GPM / 最近约 20 场比赛 |
-| Match History | `matches <id>` | Full history with pagination / 完整比赛历史 |
-| Hero Stats | `heroes <id>` | Games, win rate per hero / 各英雄使用场次、胜率 |
-| Match Detail | `match <match_id>` | Full match data for 10 players / 单场 10 名玩家数据 |
-| Teammates | `peers <id>` | Frequent teammates with win rate / 经常一起玩的玩家 |
-| Hero List | `hero_list` | All heroes with attributes and roles / 全部英雄列表 |
-| Hero Stats | `hero_stats` | Global hero statistics / 全局英雄统计数据 |
-| Refresh Data | `refresh <id>` | Force refresh player's recent matches / 强制刷新玩家数据 |
-
-## Project Structure / 项目结构
+## 📁 项目结构
 
 ```
 dota2-stats/
-├── SKILL.md          # Claude Code skill definition
-├── dota2_query.py    # Python query script (core tool)
-└── README.md         # This file
+├── SKILL.md          # Claude Code 技能描述
+├── dota2_query.py    # Python 查询脚本（全部功能）
+└── README.md         # 本文件
 ```
 
-## Installation / 安装
+## 🚀 使用
 
-### Prerequisites / 前提条件
+### 在 Claude Code 中
 
-- **Python 3.6+** (stdlib only, no dependencies)
-- **Claude Code** installed
-
-### Setup / 安装步骤
-
-Place this directory in the Claude Code skills directory:
-
-将本目录放置于 Claude Code 技能目录下：
+将目录放在 `~/.claude/skills/dota2-stats/`，然后直接用自然语言提问：
 
 ```
-~/.claude/skills/dota2-stats/
+> 查一下 Miracle 的 Dota 2 战绩
+> 看看影魔对抗谁胜率最低
+> 最近有什么职业比赛
 ```
 
-## Usage / 使用方式
-
-### In Claude Code / 在 Claude Code 中使用
-
-Just ask in natural language:
-
-直接自然语言提问：
-
-```
-> Check Miracle-'s Dota 2 stats
-> Show recent matches for account_id 105248644
-> What heroes does this player use most?
-```
-
-Claude will auto-detect the intent and invoke the skill.
-
-### CLI Usage / 命令行使用
+### 命令行独立使用
 
 ```bash
-# English output / 英文输出
-python dota2_query.py search Miracle --lang en
-python dota2_query.py player 105248644 --lang en
-python dota2_query.py recent 105248644 --lang en
-
-# Chinese output (default) / 中文输出（默认）
 python dota2_query.py search Miracle
 python dota2_query.py player 105248644
 python dota2_query.py recent 105248644
-
-# With filters / 带筛选条件
-python dota2_query.py wl 105248644 --days 30 --lobby_type 7
-python dota2_query.py heroes 105248644 --limit 10
-python dota2_query.py peers 105248644 --limit 10
+python dota2_query.py hero_matchups 11          # 影魔对抗数据
+python dota2_query.py hero_rankings 74          # 祈求者 Top 玩家
+python dota2_query.py pro_matches --limit 10
+python dota2_query.py live
+python dota2_query.py team 8291895              # 查战队
+python dota2_query.py constants items           # 物品数据
 ```
 
-## Example Output / 输出示例
+### 筛选参数
 
-### Player Profile (English) / 玩家信息（英文）
-```
-==================================================
-  Player Profile
-==================================================
-  Name:        SawagedKick
-  Account ID:  105248644
-  Rank:        Immortal
-  Leaderboard: #16
-  Total Games: 4062
-  W/L:         2389W / 1673L
-  Win Rate:    58.8%
-==================================================
+```bash
+python dota2_query.py wl 105248644 --days 30 --lobby_type 7    # 近30天排位
+python dota2_query.py matches 105248644 --hero_id 11 --limit 5 # 影魔最近5场
+python dota2_query.py --lang en player 105248644                # English output
 ```
 
-### Recent Matches (English) / 最近比赛（英文）
-```
-  Recent 20 Matches:
+## 🔧 技术
 
-  Hero             Result K/D/A      GPM    XPM    Duration Date
-  ------------------------------------------------------------------------------
-  Bloodseeker      W      13/4/12    846    841    49:36    2025-01-21 00:12
-  Night Stalker    L      13/6/7     669    812    53:13    2025-01-20 22:54
-  Bristleback      W      9/1/10     743    786    31:45    2025-01-20 21:57
+- **API**: OpenDota API v31（免费，无需 Key）
+- **依赖**: 仅 Python 3.6+ 标准库
+- **Headers**: 配置完整浏览器级 HTTP Headers 防止 403
+- **本地化**: 内置 127 个英雄中文名 + 段位/模式中英双语
 
-  Last 20: 13W 7L (Win Rate 65.0%)
-```
-
-### 玩家信息（中文）
-```
-==================================================
-  玩家资料
-==================================================
-  名称:       SawagedKick
-  Account ID: 105248644
-  段位:       冠绝一世
-  天梯排名:   #16
-  总场次:     4062
-  胜/负:      2389胜 / 1673负
-  总胜率:     58.8%
-==================================================
-```
-
-## Technical Details / 技术细节
-
-- **API**: [OpenDota API](https://docs.opendota.com/) (free, no API key required)
-- **Dependencies / 依赖**: Python stdlib only (`urllib`, `json`, `sys`, `time`, `datetime`)
-- **Rate Limit / 频率限制**: OpenDota has rate limits for unauthenticated users
-- **Data Availability / 数据可用性**: Player must enable "Expose Public Match Data" in Dota 2 client
-
-## Notes / 注意事项
-
-1. Steam ID conversion: `account_id = steam64_id - 76561197960265728`
-2. Rank encoding: tens = tier (1-8), ones = stars (1-5)
-3. Win/loss: determined by `player_slot` (0-127 Radiant / 128-255 Dire) combined with `radiant_win`
-4. Timestamps converted to UTC+8 by default
-
-## License / 许可证
+## 📄 License
 
 MIT

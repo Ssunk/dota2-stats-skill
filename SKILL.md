@@ -1,163 +1,99 @@
 ---
 name: dota2-stats
-description: Query Dota 2 player records, match data and hero statistics. Supports player search by name, query by account_id, recent matches, hero stats, etc. Use --lang en for English output, default is Chinese. 查询 Dota 2 玩家战绩、比赛数据和英雄统计。支持通过玩家名搜索、通过 account_id 查询、查看最近比赛、英雄使用统计等功能。
+description: Query Dota 2 player records, match data, hero statistics, pro scene, teams, leagues and live games via OpenDota API. Supports 27 commands covering all API endpoints. Use --lang en for English output, default is Chinese. 查询 Dota 2 玩家战绩、比赛数据、英雄统计、职业赛事、战队、联赛和实时比赛。支持27个命令覆盖所有 OpenDota API 端点。
 ---
 
-# Dota 2 Stats Query Skill / Dota 2 战绩查询技能
+# Dota 2 Stats Query Skill (Full API Coverage)
 
-This skill queries Dota 2 data via the [OpenDota API](https://docs.opendota.com/) using a Python script.
+本技能使用 Python 脚本通过 [OpenDota API](https://docs.opendota.com/) 查询 Dota 2 数据，覆盖全部 API 端点。
 
-本技能使用 Python 脚本通过 [OpenDota API](https://docs.opendota.com/) 查询 Dota 2 相关数据。
-
-## Language / 语言
-
-- **Default**: Chinese (中文)
-- **English**: add `--lang en` to any command
-- **中文**: 默认输出中文，无需额外参数，输出的段位还有英雄名也必须是中文
-
-Example:
-```bash
-# English output
-python dota2_query.py player 105248644 --lang en
-
-# Chinese output (default)
-python dota2_query.py player 105248644
-```
-
-## Tool Script / 工具脚本
-
-The query tool is located at:
-查询工具位于：
+## Tool Script
 
 ```
 ~/.claude/skills/dota2-stats/dota2_query.py
 ```
 
-The script uses **only Python standard library** (urllib, json), no third-party dependencies required.
-该脚本**仅使用 Python 标准库**，无需安装任何第三方依赖。
+**仅使用 Python 标准库**，无需第三方依赖。已配置完整 HTTP Headers 避免 403。
 
-## Available Commands / 可用命令
+## Commands (27 total)
 
-### 1. Search Player / 搜索玩家
+### Player Commands
 ```bash
-python ~/.claude/skills/dota2-stats/dota2_query.py search <player_name>
-```
-Use when user provides a player name instead of account_id.
-**使用时机**：用户提供玩家名而非 account_id 时。
-
-### 2. Player Profile / 获取玩家基本信息
-```bash
-python ~/.claude/skills/dota2-stats/dota2_query.py player <account_id>
-```
-
-### 3. Win/Loss Stats / 获取胜负统计
-```bash
-python ~/.claude/skills/dota2-stats/dota2_query.py wl <account_id> [--days N] [--hero_id N] [--lobby_type N]
-```
-- `--days N`: Last N days / 最近 N 天
-- `--hero_id N`: Specific hero / 指定英雄 ID
-- `--lobby_type N`: Lobby type / 大厅类型 (7=Ranked 排位)
-
-### 4. Recent Matches / 获取最近比赛
-```bash
-python ~/.claude/skills/dota2-stats/dota2_query.py recent <account_id>
+python dota2_query.py search <name>              # 搜索玩家
+python dota2_query.py player <account_id>         # 玩家信息/段位/胜率
+python dota2_query.py wl <id> [--days/--hero_id/--lobby_type]  # 胜负统计
+python dota2_query.py recent <id>                 # 最近~20场比赛
+python dota2_query.py matches <id> [--limit/--hero_id/--days]  # 完整比赛历史
+python dota2_query.py heroes <id> [--limit N]     # 英雄使用统计
+python dota2_query.py peers <id> [--limit N]      # 一起玩的人
+python dota2_query.py totals <id> [filters]       # 生涯总计(击杀/助攻等)
+python dota2_query.py counts <id>                 # 分类统计
+python dota2_query.py rankings <id>               # 玩家英雄排名
+python dota2_query.py ratings <id>                # 段位历史
+python dota2_query.py refresh <id>                # 刷新玩家数据
 ```
 
-### 5. Match History / 获取比赛历史
+### Match Commands
 ```bash
-python ~/.claude/skills/dota2-stats/dota2_query.py matches <account_id> [--limit N] [--hero_id N] [--days N]
+python dota2_query.py match <match_id>            # 单场比赛详情(10人数据)
 ```
 
-### 6. Hero Stats / 获取英雄使用统计
+### Hero Commands
 ```bash
-python ~/.claude/skills/dota2-stats/dota2_query.py heroes <account_id> [--limit N]
+python dota2_query.py hero_list                   # 所有英雄列表
+python dota2_query.py hero_stats                  # 英雄全局统计
+python dota2_query.py hero_matchups <hero_id>     # 英雄对抗胜率
+python dota2_query.py hero_rankings <hero_id>     # 英雄排行榜(Top玩家)
+python dota2_query.py benchmarks <hero_id>        # 英雄表现基准
 ```
 
-### 7. Match Detail / 获取单场比赛详情
+### Global / Pro Commands
 ```bash
-python ~/.claude/skills/dota2-stats/dota2_query.py match <match_id>
+python dota2_query.py pro_players                 # 职业选手列表
+python dota2_query.py pro_matches [--limit N]     # 职业比赛
+python dota2_query.py public_matches [--min_rank] # 公开比赛
+python dota2_query.py live                        # 实时比赛
+python dota2_query.py teams [--limit N]           # 战队列表
+python dota2_query.py team <team_id>              # 战队详情+阵容+比赛
+python dota2_query.py leagues                     # 联赛列表
+python dota2_query.py constants <resource>        # 游戏常量(heroes/items等)
+python dota2_query.py find_matches --teamA 1,2 --teamB 3,4  # 按英雄组合搜索
 ```
 
-### 8. Frequent Teammates / 获取一起玩的玩家
-```bash
-python ~/.claude/skills/dota2-stats/dota2_query.py peers <account_id> [--limit N]
-```
+### Common Filters
+- `--days N` — 最近 N 天
+- `--hero_id N` — 指定英雄 ID
+- `--lobby_type N` — 大厅类型 (7=排位)
+- `--game_mode N` — 游戏模式
+- `--limit N` — 限制结果数
+- `--lang zh|en` — 输出语言 (默认中文)
 
-### 9. Hero List / 获取英雄列表
-```bash
-python ~/.claude/skills/dota2-stats/dota2_query.py hero_list
-```
+## Usage Flow
 
-### 10. Global Hero Stats / 获取英雄统计数据
-```bash
-python ~/.claude/skills/dota2-stats/dota2_query.py hero_stats
-```
+### 用户提供玩家名时:
+1. `search <名字>` → 获取 account_id
+2. `player <id>` → 查看基本信息
+3. `recent <id>` → 查看最近比赛
 
-### 11. Refresh Player Data / 刷新玩家数据
-```bash
-python ~/.claude/skills/dota2-stats/dota2_query.py refresh <account_id>
-```
+### Steam ID 转换:
+`account_id = steam64_id - 76561197960265728`
 
-## Usage Flow / 使用流程
-
-### When user provides a player name / 当用户提供玩家名时：
-1. Run `search <player_name>` to find the player
-2. Show search results for confirmation (if multiple matches)
-3. Use the confirmed `account_id` for further queries
-
-### When user provides account_id or Steam ID / 当用户提供 account_id 或 Steam ID 时：
-- Convert Steam 64-bit ID to 32-bit: `account_id = steam64_id - 76561197960265728`
-- Query directly with account_id
-
-### Standard flow for match queries / 查询战绩的标准流程：
-1. Run `player <account_id>` for profile info and win rate
-2. Run `recent <account_id>` for recent matches
-3. Run `heroes` or `matches` based on user needs
-
-## Rank Tier Decoding / 段位解读
+## Rank Tier
 
 | Tier | English | 中文 |
 |------|---------|------|
 | 1 | Herald | 先锋 |
 | 2 | Guardian | 卫士 |
 | 3 | Crusader | 中军 |
-| 4 | Archon | 统帅 |
+| 4 | Archon | 执政官 |
 | 5 | Legend | 传奇 |
-| 6 | Ancient | 万古流芳 |
-| 7 | Divine | 超凡入圣 |
+| 6 | Ancient | 远古 |
+| 7 | Divine | 神圣 |
 | 8 | Immortal | 冠绝一世 |
 
-- Tens digit = tier, ones digit = stars (1-5)
-- 十位数代表段位，个位数代表星数
-- Example: `75` = Divine 5 / 神圣五星
-
-## Common Game Modes / 常见游戏模式 ID
-
-| ID | English | 中文 |
-|----|---------|------|
-| 1 | All Pick | 全英雄选择 |
-| 2 | Captain's Mode | 队长模式 |
-| 22 | All Pick Ranked | 排位全选 |
-| 23 | Turbo | 加速模式 |
-
-## Common Lobby Types / 常见大厅类型 ID
-
-| ID | English | 中文 |
-|----|---------|------|
-| 0 | Normal | 普通 |
-| 7 | Ranked | 排位 |
-
-## Hero Names / 英雄名称
-
-- The script embeds a complete Chinese hero name mapping (127 heroes).
-- Default mode uses built-in Chinese hero names; `--lang en` uses API English names.
-- 脚本内置了完整的 Dota 2 英雄中英文名称对照表（127 个英雄）。
-- 默认中文输出使用内置中文名，英文模式使用 API 英文名。
-
-## Notes / 注意事项
-
-1. The script uses only Python stdlib, no pip install needed / 脚本仅使用 Python 标准库
-2. Player must enable "Expose Public Match Data" in Dota 2 client / 玩家需开启「公开比赛数据」
-3. OpenDota API has rate limits, avoid excessive requests / API 有频率限制
-4. Output language defaults to Chinese, use `--lang en` for English / 输出默认中文
-5. Use system Python 3 (`python` or `python3`)
+## Notes
+1. 仅使用 Python 标准库，无需 pip install
+2. 已配置浏览器级 HTTP Headers 防止 403
+3. 玩家需开启「公开比赛数据」
+4. 内置 127 个英雄的中文名映射
+5. 默认输出中文，`--lang en` 切换英文
