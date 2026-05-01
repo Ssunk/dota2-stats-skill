@@ -85,10 +85,10 @@ python dota2_query.py find_matches --teamA 1,2 --teamB 3,4  # 按英雄组合搜
 | 1 | Herald | 先锋 |
 | 2 | Guardian | 卫士 |
 | 3 | Crusader | 中军 |
-| 4 | Archon | 执政官 |
+| 4 | Archon | 统帅 |
 | 5 | Legend | 传奇 |
-| 6 | Ancient | 远古 |
-| 7 | Divine | 神圣 |
+| 6 | Ancient | 万古流芳 |
+| 7 | Divine | 超凡入圣 |
 | 8 | Immortal | 冠绝一世 |
 
 ## Notes

@@ -60,13 +60,9 @@ BASE_URL = "https://api.opendota.com/api"
 
 # HTTP headers to avoid 403
 REQUEST_HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Accept": "application/json, text/plain, */*",
-    "Accept-Language": "en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7",
-    "Accept-Encoding": "identity",
-    "Referer": "https://www.opendota.com/",
-    "Origin": "https://www.opendota.com",
-    "Connection": "keep-alive",
+    "Content type": "application/json; charset=utf-8"
 }
 
 # ──────────────────────────────────────────────
@@ -79,6 +75,8 @@ T = {
         "not_found": "玩家未找到或数据不可用",
         "rate_limit": "请求频率过高，请稍后再试",
         "network_error": "网络错误:",
+        "timeout_error": "请求超时，服务器 15 秒内未响应",
+        "json_error": "服务器返回了无效数据",
         "no_recent": "未找到最近比赛记录",
         "no_matches": "未找到比赛记录",
         "no_heroes": "未找到英雄使用记录",
@@ -265,6 +263,8 @@ T = {
         "not_found": "Player not found or data unavailable",
         "rate_limit": "Rate limit exceeded, please try again later",
         "network_error": "Network error:",
+        "timeout_error": "Request timed out, server did not respond within 15 seconds",
+        "json_error": "Server returned invalid data",
         "no_recent": "No recent matches found",
         "no_matches": "No matches found",
         "no_heroes": "No hero stats found",
@@ -651,6 +651,15 @@ def api_get(endpoint, params=None):
     except urllib.error.URLError as e:
         print(f"{t('network_error')} {e.reason}", file=sys.stderr)
         sys.exit(1)
+    except TimeoutError as e:
+        print(f"{t('timeout_error')} ({e})", file=sys.stderr)
+        sys.exit(1)
+    except json.JSONDecodeError as e:
+        print(f"{t('json_error')}: {e}", file=sys.stderr)
+        sys.exit(1)
+    except OSError as e:
+        print(f"{t('network_error')} {e}", file=sys.stderr)
+        sys.exit(1)
 
 
 def api_post(endpoint):
@@ -660,7 +669,23 @@ def api_post(endpoint):
     try:
         with urllib.request.urlopen(req, timeout=15) as resp:
             return json.loads(resp.read().decode("utf-8"))
-    except Exception as e:
+    except urllib.error.HTTPError as e:
+        print(f"{t('api_fail')} {e.code}", file=sys.stderr)
+        if e.code == 404:
+            print(f"   {t('not_found')}", file=sys.stderr)
+        elif e.code == 429:
+            print(f"   {t('rate_limit')}", file=sys.stderr)
+        sys.exit(1)
+    except urllib.error.URLError as e:
+        print(f"{t('network_error')} {e.reason}", file=sys.stderr)
+        sys.exit(1)
+    except TimeoutError as e:
+        print(f"{t('timeout_error')} ({e})", file=sys.stderr)
+        sys.exit(1)
+    except json.JSONDecodeError as e:
+        print(f"{t('json_error')}: {e}", file=sys.stderr)
+        sys.exit(1)
+    except OSError as e:
         print(f"{t('network_error')} {e}", file=sys.stderr)
         sys.exit(1)
 
