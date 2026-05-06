@@ -51,8 +51,9 @@
 
 ```
 dota2-stats/
-├── SKILL.md                  # Claude Code 技能描述
+├── SKILL.md                  # Claude Code/OpenClaw 技能描述
 ├── README.md                 # 本文件
+├── README_EN.md              # 英文版
 ├── scripts/
 │   └── dota2_query.py        # Python 查询脚本（全部功能）
 └── data/

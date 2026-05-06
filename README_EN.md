@@ -51,10 +51,9 @@ A complete Dota 2 data query skill based on [OpenDota API](https://docs.opendota
 
 ```
 dota2-stats/
-├── SKILL.md                  # Claude Code skill description (Chinese)
-├── SKILL_EN.md               # Claude Code skill description (English)
-├── README.md                 # This file (Chinese)
-├── README_EN.md              # English version
+├── SKILL.md                  # Claude Code/OpenClaw skill description
+├── README.md                 # Chinese version
+├── README_EN.md              # This file (English version)
 ├── scripts/
 │   └── dota2_query.py        # Python query script (all features)
 └── data/
