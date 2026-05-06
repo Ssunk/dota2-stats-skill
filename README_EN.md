@@ -1,0 +1,118 @@
+# 🎮 Dota 2 Stats Query - Agent Skill
+
+A complete Dota 2 data query skill based on [OpenDota API](https://docs.opendota.com/), covering all API endpoints for use with [Claude Code](https://docs.anthropic.com/en/docs/claude-code)/[OpenClaw](https://openclaw.ai).
+
+## ✨ Features (27 commands)
+
+### 🧑 Player
+| Command | Description |
+|---------|-------------|
+| `search <name>` | Search for a player |
+| `player <id>` | Rank, MMR, winrate |
+| `wl <id>` | Win/loss stats (with filters) |
+| `recent <id>` | Recent ~20 matches |
+| `matches <id>` | Full history |
+| `heroes <id>` | Hero statistics |
+| `peers <id>` | Frequent teammates |
+| `totals <id>` | Career cumulative data |
+| `counts <id>` | Categorized stats |
+| `rankings <id>` | Hero ranking percentiles |
+| `ratings <id>` | Rank change history |
+| `refresh <id>` | Refresh data |
+
+### ⚔️ Match
+| Command | Description |
+|---------|-------------|
+| `match <match_id>` | 10-player complete data |
+
+### 🦸 Hero
+| Command | Description |
+|---------|-------------|
+| `hero_list` | Heroes list |
+| `hero_stats` | Global statistics |
+| `hero_matchups <hero_id>` | Matchup winrates |
+| `hero_rankings <hero_id>` | Top players |
+| `benchmarks <hero_id>` | Performance benchmarks |
+
+### 🌍 Global
+| Command | Description |
+|---------|-------------|
+| `pro_players` | Pro players |
+| `pro_matches` | Pro matches |
+| `public_matches` | Public matches |
+| `live` | Live matches |
+| `teams` | Teams list |
+| `team <team_id>` | Team details+roster+results |
+| `leagues` | Leagues list |
+| `constants <resource>` | Game constants |
+| `find_matches` | Search by hero lineup |
+
+## 📁 Project Structure
+
+```
+dota2-stats/
+├── SKILL.md                  # Claude Code skill description (Chinese)
+├── SKILL_EN.md               # Claude Code skill description (English)
+├── README.md                 # This file (Chinese)
+├── README_EN.md              # English version
+├── scripts/
+│   └── dota2_query.py        # Python query script (all features)
+└── data/
+    ├── translations.json     # Chinese-English bilingual translation dictionary
+    └── hero_zh_names.json    # Hero Chinese name mapping (127 heroes)
+```
+
+## 🚀 Usage
+
+### In Claude Code
+
+Place the directory in `~/.claude/skills/dota2-stats/`, then ask questions in natural language:
+
+```
+> Check Miracle's Dota 2 stats
+> Show Shadow Fiend's worst matchup winrates
+> What pro matches are happening recently
+```
+
+### In OpenClaw
+
+Place the directory in `~/.openclaw/plugin-skills/dota2-stats/`, then ask questions in natural language:
+
+```
+> Check Miracle's Dota 2 stats
+> Show Shadow Fiend's worst matchup winrates
+> What pro matches are happening recently
+```
+
+### Command Line Standalone
+
+```bash
+python scripts/dota2_query.py search Miracle
+python scripts/dota2_query.py player 105248644
+python scripts/dota2_query.py recent 105248644
+python scripts/dota2_query.py hero_matchups 11          # Shadow Fiend matchups
+python scripts/dota2_query.py hero_rankings 74          # Invoker top players
+python scripts/dota2_query.py pro_matches --limit 10
+python scripts/dota2_query.py live
+python scripts/dota2_query.py team 8291895              # Team info
+python scripts/dota2_query.py constants items           # Items data
+```
+
+### Filter Parameters
+
+```bash
+python scripts/dota2_query.py wl 105248644 --days 30 --lobby_type 7    # Last 30 days ranked
+python scripts/dota2_query.py matches 105248644 --hero_id 11 --limit 5 # Shadow Fiend last 5
+python scripts/dota2_query.py --lang en player 105248644                # English output
+```
+
+## 🔧 Technical
+
+- **API**: OpenDota API v31 (free, no key required)
+- **Dependencies**: Python 3.6+ standard library only
+- **Headers**: Configured with complete browser-level HTTP Headers to prevent 403
+- **Localization**: Built-in 127 hero Chinese names + rank/mode bilingual
+
+## 📄 License
+
+MIT
