@@ -331,22 +331,8 @@ def cmd_wl(args):
         sys.exit(1)
 
     account_id = args[0]
-    params = {}
-
-    i = 1
-    while i < len(args):
-        if args[i] == "--days" and i + 1 < len(args):
-            params["date"] = args[i + 1]
-            i += 2
-        elif args[i] == "--hero_id" and i + 1 < len(args):
-            params["hero_id"] = args[i + 1]
-            i += 2
-        elif args[i] == "--lobby_type" and i + 1 < len(args):
-            params["lobby_type"] = args[i + 1]
-            i += 2
-        else:
-            i += 1
-
+    params = parse_filters(args[1:])
+    params["significant"] = "0"
     wl = api_get(f"/players/{account_id}/wl", params)
     total = wl["win"] + wl["lose"]
     winrate = (wl["win"] / total * 100) if total > 0 else 0
@@ -417,25 +403,12 @@ def cmd_matches(args):
         sys.exit(1)
 
     account_id = args[0]
-    params = {}
-
-    i = 1
-    while i < len(args):
-        if args[i] == "--limit" and i + 1 < len(args):
-            params["limit"] = args[i + 1]
-            i += 2
-        elif args[i] == "--hero_id" and i + 1 < len(args):
-            params["hero_id"] = args[i + 1]
-            i += 2
-        elif args[i] == "--days" and i + 1 < len(args):
-            params["date"] = args[i + 1]
-            i += 2
-        else:
-            i += 1
+    params = parse_filters(args[1:])
 
     if "limit" not in params:
         params["limit"] = "20"
 
+    params["significant"] = "0"
     hero_map = get_hero_map()
     matches = api_get(f"/players/{account_id}/matches", params)
 
@@ -483,7 +456,7 @@ def cmd_heroes(args):
             i += 1
 
     hero_map = get_hero_map()
-    hero_stats = api_get(f"/players/{account_id}/heroes")
+    hero_stats = api_get(f"/players/{account_id}/heroes", {"significant": "0"})
 
     hero_stats = [h for h in hero_stats if h.get("games", 0) > 0]
     hero_stats.sort(key=lambda x: x.get("games", 0), reverse=True)
@@ -574,7 +547,7 @@ def cmd_peers(args):
         else:
             i += 1
 
-    peers = api_get(f"/players/{account_id}/peers")
+    peers = api_get(f"/players/{account_id}/peers", {"significant": "0"})
     peers = peers[:limit]
 
     if not peers:
@@ -690,6 +663,7 @@ def cmd_totals(args):
         print(t("usage_totals")); sys.exit(1)
     account_id = args[0]
     params = parse_filters(args[1:])
+    params["significant"] = "0"
     data = api_get(f"/players/{account_id}/totals", params)
     if not data:
         print(t("no_totals")); return
@@ -710,6 +684,7 @@ def cmd_counts(args):
         print(t("usage_counts")); sys.exit(1)
     account_id = args[0]
     params = parse_filters(args[1:])
+    params["significant"] = "0"
     data = api_get(f"/players/{account_id}/counts", params)
     if not data:
         print(t("no_counts")); return
