@@ -136,7 +136,7 @@ def get_atk_name(atk_type):
 _hero_cache = None
 
 
-def api_get(endpoint, params=None):
+def api_get(endpoint, params=None, timeout=15):
     """Send GET request to OpenDota API."""
     url = f"{BASE_URL}{endpoint}"
     if params:
@@ -146,7 +146,7 @@ def api_get(endpoint, params=None):
 
     req = urllib.request.Request(url, headers=REQUEST_HEADERS)
     try:
-        with urllib.request.urlopen(req, timeout=15) as resp:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
             return json.loads(resp.read().decode("utf-8"))
     except urllib.error.HTTPError as e:
         print(f"{t('api_fail')} {e.code}", file=sys.stderr)
@@ -269,7 +269,9 @@ def cmd_search(args):
         sys.exit(1)
 
     query = " ".join(args)
-    results = api_get("/search", {"q": query})
+    print(t("search_waiting"))
+    sys.stdout.flush()
+    results = api_get("/search", {"q": query}, timeout=120)
 
     if not results:
         print(t("search_no_result", query=query))

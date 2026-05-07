@@ -25,7 +25,7 @@ This skill uses a Python script to query Dota 2 data via the [OpenDota API](http
 
 ### Player Commands
 ```bash
-python scripts/dota2_query.py search <name>              # Search for a player
+python scripts/dota2_query.py search <name>              # Search for a player (SLOW: 1-2 min)
 python scripts/dota2_query.py player <account_id>         # Player info/rank/winrate
 python scripts/dota2_query.py wl <id> [--days/--hero_id/--lobby_type]  # Win/loss stats
 python scripts/dota2_query.py recent <id>                 # Recent ~20 matches
@@ -103,3 +103,4 @@ python scripts/dota2_query.py find_matches --teamA 1,2 --teamB 3,4  # Search by 
 3. Players need to have "Public Match Data" enabled
 4. Built-in Chinese names for 127 heroes
 5. Select the output language based on the language used in the user's question, use `--lang en` for English, `--lang zh` for Chinese
+6. **`search` command is slow** (1-2 minutes) because it queries the entire OpenDota player database. When invoking this command, always remind the user that it may take a while and to please wait patiently. If the user already knows the player's Dota 2 account ID, suggest using `player <account_id>` directly for faster results

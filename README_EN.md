@@ -70,7 +70,7 @@ dota2-stats-skill/
 Place the directory in `~/.claude/skills/dota2-stats-skill/`, then ask questions in natural language:
 
 ```
-> Check Miracle's Dota 2 stats
+> Check <id> Dota 2 stats
 > Show Shadow Fiend's worst matchup winrates
 > What pro matches are happening recently
 ```
@@ -80,7 +80,7 @@ Place the directory in `~/.claude/skills/dota2-stats-skill/`, then ask questions
 Place the directory in `~/.openclaw/plugin-skills/dota2-stats-skill/`, then ask questions in natural language:
 
 ```
-> Check Miracle's Dota 2 stats
+> Check <id> Dota 2 stats
 > Show Shadow Fiend's worst matchup winrates
 > What pro matches are happening recently
 ```

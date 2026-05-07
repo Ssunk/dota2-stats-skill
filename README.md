@@ -70,7 +70,7 @@ dota2-stats-skill/
 将目录放在 `~/.claude/skills/dota2-stats-skill/`，然后直接用自然语言提问：
 
 ```
-> 查一下 Miracle 的 Dota 2 战绩
+> 查一下 <id> 的 Dota 2 战绩
 > 看看影魔对抗谁胜率最低
 > 最近有什么职业比赛
 ```
@@ -80,7 +80,7 @@ dota2-stats-skill/
 将目录放在 `~/.openclaw/plugin-skills/dota2-stats-skill/`，然后直接用自然语言提问：
 
 ```
-> 查一下 Miracle 的 Dota 2 战绩
+> 查一下 <id> 的 Dota 2 战绩
 > 看看影魔对抗谁胜率最低
 > 最近有什么职业比赛
 ```
