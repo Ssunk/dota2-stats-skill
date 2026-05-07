@@ -81,8 +81,8 @@ python scripts/dota2_query.py find_matches --teamA 1,2 --teamB 3,4  # Search by 
 2. `player <id>` → View basic info
 3. `recent <id>` → View recent matches
 
-### Steam ID conversion:
-`account_id = steam64_id - 76561197960265728`
+### Steam ID:
+*The tool automatically converts 64-bit Steam IDs to 32-bit Account IDs. You can pass either format.*
 
 ## Rank Tier
 

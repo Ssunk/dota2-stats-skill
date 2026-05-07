@@ -59,8 +59,10 @@ dota2-stats-skill/
 ├── scripts/
 │   └── dota2_query.py        # Python query script (all features)
 └── data/
-    ├── translations.json     # Chinese-English bilingual translation dictionary
-    └── hero_zh_names.json    # Hero Chinese name mapping (127 heroes)
+    ├── translations.json     # Chinese-English bilingual translation dictionary (UI text)
+    ├── dota_constants.json   # Game static constants mapping (ranks, modes, lobbies, etc.)
+    ├── hero_zh_names.json    # Hero Chinese name mapping (127 heroes)
+    └── hero_en_names.json    # (Auto-generated) Hero English names cache
 ```
 
 ## 🚀 Usage

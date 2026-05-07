@@ -79,6 +79,7 @@ def _load_json(filename):
 
 
 T = _load_json("translations.json")
+C = _load_json("dota_constants.json")
 HERO_ZH_NAMES = {int(k): v for k, v in _load_json("hero_zh_names.json").items()}
 
 # Global language, set during startup
@@ -96,37 +97,38 @@ def t(key, **kwargs):
 def get_rank_name(tier):
     """Get localized rank tier name."""
     name_key = f"rank_{tier}"
-    if name_key in T[LANG]:
-        return T[LANG][name_key]
-    return t("rank_unknown", tier=tier)
+    if name_key in C[LANG]:
+        return C[LANG][name_key]
+    s = C[LANG].get("rank_unknown", C["zh"].get("rank_unknown", "Unknown({tier})"))
+    return s.format(tier=tier)
 
 
 def get_mode_name(mode_id):
     """Get localized game mode name. Falls back to zh if not found in current lang."""
     key = f"mode_{mode_id}"
-    translated = t(key)
+    translated = C[LANG].get(key, C["zh"].get(key, key))
     return translated if translated != key else str(mode_id)
 
 
 def get_lobby_name(lobby_id):
     """Get localized lobby type name. Falls back to zh if not found in current lang."""
     key = f"lobby_{lobby_id}"
-    translated = t(key)
+    translated = C[LANG].get(key, C["zh"].get(key, key))
     return translated if translated != key else str(lobby_id)
 
 
 def get_attr_name(attr):
     """Get localized attribute name. Falls back to zh if not found in current lang."""
     key = f"attr_{attr}"
-    translated = t(key)
+    translated = C[LANG].get(key, C["zh"].get(key, key))
     return translated if translated != key else attr
 
 
 def get_atk_name(atk_type):
     """Get localized attack type name."""
     if atk_type == "Melee":
-        return t("atk_melee")
-    return t("atk_ranged")
+        return C[LANG].get("atk_melee", C["zh"].get("atk_melee", "Melee"))
+    return C[LANG].get("atk_ranged", C["zh"].get("atk_ranged", "Ranged"))
 
 
 # ──────────────────────────────────────────────
@@ -134,6 +136,37 @@ def get_atk_name(atk_type):
 # ──────────────────────────────────────────────
 
 _hero_cache = None
+
+
+def _send_request(req, timeout=15):
+    """Internal function to send request with retry logic for 429."""
+    max_retries = 2
+    for attempt in range(max_retries + 1):
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                return json.loads(resp.read().decode("utf-8"))
+        except urllib.error.HTTPError as e:
+            if e.code == 429 and attempt < max_retries:
+                time.sleep(2)
+                continue
+            print(f"{t('api_fail')} {e.code}", file=sys.stderr)
+            if e.code == 404:
+                print(f"   {t('not_found')}", file=sys.stderr)
+            elif e.code == 429:
+                print(f"   {t('rate_limit')}", file=sys.stderr)
+            sys.exit(1)
+        except urllib.error.URLError as e:
+            print(f"{t('network_error')} {e.reason}", file=sys.stderr)
+            sys.exit(1)
+        except TimeoutError as e:
+            print(f"{t('timeout_error')} ({e})", file=sys.stderr)
+            sys.exit(1)
+        except json.JSONDecodeError as e:
+            print(f"{t('json_error')}: {e}", file=sys.stderr)
+            sys.exit(1)
+        except OSError as e:
+            print(f"{t('network_error')} {e}", file=sys.stderr)
+            sys.exit(1)
 
 
 def api_get(endpoint, params=None, timeout=15):
@@ -145,67 +178,45 @@ def api_get(endpoint, params=None, timeout=15):
             url += "?" + urllib.parse.urlencode(filtered)
 
     req = urllib.request.Request(url, headers=REQUEST_HEADERS)
-    try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
-            return json.loads(resp.read().decode("utf-8"))
-    except urllib.error.HTTPError as e:
-        print(f"{t('api_fail')} {e.code}", file=sys.stderr)
-        if e.code == 404:
-            print(f"   {t('not_found')}", file=sys.stderr)
-        elif e.code == 429:
-            print(f"   {t('rate_limit')}", file=sys.stderr)
-        sys.exit(1)
-    except urllib.error.URLError as e:
-        print(f"{t('network_error')} {e.reason}", file=sys.stderr)
-        sys.exit(1)
-    except TimeoutError as e:
-        print(f"{t('timeout_error')} ({e})", file=sys.stderr)
-        sys.exit(1)
-    except json.JSONDecodeError as e:
-        print(f"{t('json_error')}: {e}", file=sys.stderr)
-        sys.exit(1)
-    except OSError as e:
-        print(f"{t('network_error')} {e}", file=sys.stderr)
-        sys.exit(1)
+    return _send_request(req, timeout)
 
 
 def api_post(endpoint):
     """Send POST request to OpenDota API."""
     url = f"{BASE_URL}{endpoint}"
     req = urllib.request.Request(url, method="POST", headers=REQUEST_HEADERS)
-    try:
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            return json.loads(resp.read().decode("utf-8"))
-    except urllib.error.HTTPError as e:
-        print(f"{t('api_fail')} {e.code}", file=sys.stderr)
-        if e.code == 404:
-            print(f"   {t('not_found')}", file=sys.stderr)
-        elif e.code == 429:
-            print(f"   {t('rate_limit')}", file=sys.stderr)
-        sys.exit(1)
-    except urllib.error.URLError as e:
-        print(f"{t('network_error')} {e.reason}", file=sys.stderr)
-        sys.exit(1)
-    except TimeoutError as e:
-        print(f"{t('timeout_error')} ({e})", file=sys.stderr)
-        sys.exit(1)
-    except json.JSONDecodeError as e:
-        print(f"{t('json_error')}: {e}", file=sys.stderr)
-        sys.exit(1)
-    except OSError as e:
-        print(f"{t('network_error')} {e}", file=sys.stderr)
-        sys.exit(1)
+    return _send_request(req, 15)
 
 
 def get_hero_map():
-    """Get hero ID → name mapping (cached). Chinese names from HERO_ZH_NAMES, English from API."""
+    """Get hero ID → name mapping (cached). Chinese names from HERO_ZH_NAMES, English from API/cache."""
     global _hero_cache
-    if _hero_cache is None:
+    if _hero_cache is not None:
+        return _hero_cache
+
+    cache_file = os.path.join(DATA_DIR, "hero_en_names.json")
+    heroes_en = {}
+    if os.path.exists(cache_file):
+        try:
+            with open(cache_file, "r", encoding="utf-8") as f:
+                heroes_en = json.load(f)
+        except Exception:
+            pass
+
+    if not heroes_en:
         heroes = api_get("/heroes")
-        if LANG == "zh":
-            _hero_cache = {h["id"]: HERO_ZH_NAMES.get(h["id"], h["localized_name"]) for h in heroes}
-        else:
-            _hero_cache = {h["id"]: h["localized_name"] for h in heroes}
+        heroes_en = {str(h["id"]): h["localized_name"] for h in heroes}
+        try:
+            with open(cache_file, "w", encoding="utf-8") as f:
+                json.dump(heroes_en, f, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
+
+    if LANG == "zh":
+        _hero_cache = {int(k): HERO_ZH_NAMES.get(int(k), v) for k, v in heroes_en.items()}
+    else:
+        _hero_cache = {int(k): v for k, v in heroes_en.items()}
+
     return _hero_cache
 
 
@@ -215,10 +226,10 @@ def format_duration(seconds):
 
 
 def format_time(unix_ts):
-    """Convert Unix timestamp to readable date string (UTC+8)."""
+    """Convert Unix timestamp to readable date string (Local timezone)."""
     if not unix_ts:
         return t("unknown")
-    dt = datetime.fromtimestamp(unix_ts, tz=timezone(timedelta(hours=8)))
+    dt = datetime.fromtimestamp(unix_ts, tz=timezone.utc).astimezone()
     return dt.strftime("%Y-%m-%d %H:%M")
 
 
@@ -761,7 +772,9 @@ def cmd_pro_players(args):
 def cmd_pro_matches(args):
     """GET /proMatches - Recent pro matches."""
     params = parse_filters(args)
-    data = api_get("/proMatches", params)
+    # /proMatches only supports less_than_match_id according to api.json
+    api_params = {k: v for k, v in params.items() if k in ["less_than_match_id"]}
+    data = api_get("/proMatches", api_params)
     if not data:
         print(t("no_pro_matches")); return
     limit = int(params.get("limit", 20))
@@ -781,7 +794,9 @@ def cmd_pro_matches(args):
 def cmd_public_matches(args):
     """GET /publicMatches - Recent public matches."""
     params = parse_filters(args)
-    data = api_get("/publicMatches", params)
+    # /publicMatches only supports less_than_match_id, min_rank, max_rank
+    api_params = {k: v for k, v in params.items() if k in ["less_than_match_id", "min_rank", "max_rank"]}
+    data = api_get("/publicMatches", api_params)
     if not data:
         print(t("no_public_matches")); return
     hero_map = get_hero_map()
@@ -825,7 +840,9 @@ def cmd_live(args):
 def cmd_teams(args):
     """GET /teams - Team list."""
     params = parse_filters(args)
-    data = api_get("/teams", params)
+    # /teams only supports page according to api.json
+    api_params = {k: v for k, v in params.items() if k in ["page"]}
+    data = api_get("/teams", api_params)
     if not data:
         print(t("no_teams")); return
     limit = int(params.get("limit", 25))
@@ -856,7 +873,8 @@ def cmd_team(args):
     # Players
     players = api_get(f"/teams/{team_id}/players")
     if players:
-        current = [p for p in players if p.get("is_current_team_member")]
+        player_list = players if isinstance(players, list) else [players] if isinstance(players, dict) else []
+        current = [p for p in player_list if isinstance(p, dict) and p.get("is_current_team_member")]
         if current:
             print(f"\n  {t('team_roster')}:")
             for p in current:
@@ -870,8 +888,10 @@ def cmd_team(args):
         print(f"\n  {t('team_recent_matches')}:")
         print(f"  {t('matches_col_id'):<14} {t('col_opponent'):<20} {t('col_result'):<8} {t('col_score'):<10} {t('col_duration')}")
         print("  " + "-" * 65)
-        match_list = matches if isinstance(matches, list) else []
+        match_list = matches if isinstance(matches, list) else [matches] if isinstance(matches, dict) else []
         for m in match_list[:10]:
+            if not isinstance(m, dict):
+                continue
             mid = m.get("match_id", "?")
             opp = (m.get("opposing_team_name") or "?")[:18]
             is_rad = m.get("radiant")
@@ -1054,6 +1074,15 @@ def main():
 
     command = filtered_args[0]
     cmd_args = filtered_args[1:]
+
+    # Auto-convert Steam64 ID to 32-bit Account ID
+    if cmd_args:
+        try:
+            val = int(cmd_args[0])
+            if val > 76561197960265728:
+                cmd_args[0] = str(val - 76561197960265728)
+        except ValueError:
+            pass
 
     commands = {
         "search": cmd_search,

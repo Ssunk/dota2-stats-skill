@@ -59,8 +59,10 @@ dota2-stats-skill/
 ├── scripts/
 │   └── dota2_query.py        # Python 查询脚本（全部功能）
 └── data/
-    ├── translations.json     # 中英双语翻译字典
-    └── hero_zh_names.json    # 英雄中文名映射 (127 个)
+    ├── translations.json     # 中英双语翻译字典 (仅含界面文本)
+    ├── dota_constants.json   # 游戏静态常量映射 (段位、模式、大厅等)
+    ├── hero_zh_names.json    # 英雄中文名映射 (127 个)
+    └── hero_en_names.json    # (自动生成) 英雄英文名本地缓存
 ```
 
 ## 🚀 使用
