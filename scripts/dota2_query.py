@@ -521,12 +521,14 @@ def cmd_match(args):
 
     def print_team(team_name, team_players):
         print(f"  {'─'*38} {team_name} {'─'*38}")
-        print(f"  {t('match_col_player'):<18} {t('heroes_col_hero'):<16} {'K/D/A':<10} {t('recent_col_gpm'):<6} {t('recent_col_xpm'):<6} {t('match_col_damage'):<8} {t('match_col_lh'):<6} {t('match_col_level')}")
-        print(f"  {'-'*76}")
+        print(f"  {t('match_col_player'):<30} {t('heroes_col_hero'):<16} {'K/D/A':<10} {t('recent_col_gpm'):<6} {t('recent_col_xpm'):<6} {t('match_col_damage'):<8} {t('match_col_lh'):<6} {t('match_col_level')}")
+        print(f"  {'-'*88}")
         for p in team_players:
             name = p.get("personaname") or t("match_anonymous")
-            if len(name) > 15:
-                name = name[:14] + "…"
+            account_id = p.get("account_id", "?")
+            display_name = f"{name} ({account_id})"
+            if len(display_name) > 27:
+                display_name = display_name[:26] + "…"
             hero = hero_map.get(p.get("hero_id", 0), t("unknown"))
             kda = f"{p.get('kills', 0)}/{p.get('deaths', 0)}/{p.get('assists', 0)}"
             gpm = str(p.get("gold_per_min", 0))
@@ -534,7 +536,7 @@ def cmd_match(args):
             dmg = str(p.get("hero_damage", 0))
             lh = str(p.get("last_hits", 0))
             lvl = str(p.get("level", 0))
-            print(f"  {name:<18} {hero:<16} {kda:<10} {gpm:<6} {xpm:<6} {dmg:<8} {lh:<6} {lvl}")
+            print(f"  {display_name:<30} {hero:<16} {kda:<10} {gpm:<6} {xpm:<6} {dmg:<8} {lh:<6} {lvl}")
         print()
 
     print_team(t("match_team_radiant"), radiant)
